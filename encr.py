@@ -45,7 +45,7 @@ def run_xor_demo():
     print(f"\nOriginal message: '{message}'")
     print(f"XOR Key used: '{key}'")
     print(f"Encrypted message (raw characters): '{encrypted_message}'")
-
+    
     # Note: Displaying raw characters might show unprintable characters.
     # For better display, you might want to hex-encode it, but for simplicity, we'll keep it raw.
     print(f"Encrypted message (hex representation): {encrypted_message.encode().hex()}")
@@ -111,7 +111,6 @@ def run_fernet_demo():
             print(f"Error during decryption: {e}. This might happen if the key is incorrect or data is tampered.")
     else:
         print("Skipping decryption.")
-
 
 # --- AES Encryption Demo (CBC Mode with PKCS7 Padding) ---
 # AES key and IV management (for demo purposes, generated on the fly)
