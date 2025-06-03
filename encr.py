@@ -111,3 +111,129 @@ def run_fernet_demo():
             print(f"Error during decryption: {e}. This might happen if the key is incorrect or data is tampered.")
     else:
         print("Skipping decryption.")
+
+
+# --- AES Encryption Demo (CBC Mode with PKCS7 Padding) ---
+# AES key and IV management (for demo purposes, generated on the fly)
+# In a real application, these would be managed securely.
+
+def aes_encrypt(plaintext, key, iv):
+    """
+    Encrypts plaintext using AES in CBC mode with PKCS7 padding.
+
+    Args:
+        plaintext (bytes): The data to encrypt.
+        key (bytes): The AES key (16, 24, or 32 bytes for AES-128, 192, 256).
+        iv (bytes): The Initialization Vector (16 bytes for AES).
+
+    Returns:
+        bytes: The encrypted ciphertext.
+    """
+    # Create a padder for PKCS7 padding
+    padder = padding.PKCS7(algorithms.AES.block_size).padder()
+    padded_data = padder.update(plaintext) + padder.finalize()
+
+    # Create an AES cipher object in CBC mode with the given key and IV
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+
+    # Encrypt the padded data
+    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+    return ciphertext
+
+def aes_decrypt(ciphertext, key, iv):
+    """
+    Decrypts ciphertext using AES in CBC mode with PKCS7 padding.
+
+    Args:
+        ciphertext (bytes): The data to decrypt.
+        key (bytes): The AES key.
+        iv (bytes): The Initialization Vector.
+
+    Returns:
+        bytes: The decrypted plaintext.
+    """
+    # Create an AES cipher object in CBC mode with the given key and IV
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+
+    # Decrypt the ciphertext
+    decrypted_padded_data = decryptor.update(ciphertext) + decryptor.finalize()
+
+    # Create an unpadder for PKCS7 padding
+    unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
+    unpadded_data = unpadder.update(decrypted_padded_data) + unpadder.finalize()
+    return unpadded_data
+
+def run_aes_demo():
+    print("\n--- AES Encryption Demo (CBC Mode) ---")
+    print("AES is a widely used symmetric block cipher. This demo uses AES-256 in CBC mode.")
+    print("It requires a key and an Initialization Vector (IV).")
+
+    # Generate a random 256-bit key (32 bytes) and a 128-bit IV (16 bytes)
+    # These should be securely generated and managed in a real application.
+    key = os.urandom(32) # AES-256 key
+    iv = os.urandom(16)  # Initialization Vector for CBC mode
+
+    print(f"\nGenerated AES Key (hex): {key.hex()}")
+    print(f"Generated AES IV (hex): {iv.hex()}")
+    print("NOTE: For real applications, securely store and transmit the key and IV.")
+
+    message = input("Enter the string you wish to encrypt: ")
+    
+    # Encrypt
+    # AES requires bytes, so encode the string
+    encrypted_data = aes_encrypt(message.encode('utf-8'), key, iv)
+    print(f"\nOriginal message: '{message}'")
+    print(f"Encrypted message (hex encoded): {encrypted_data.hex()}")
+
+    # Decrypt
+    decrypt_choice = input("Do you want to decrypt this message now? (yes/no): ").lower()
+    if decrypt_choice == 'yes':
+        try:
+            # Decrypt returns bytes, so decode to string
+            decrypted_data = aes_decrypt(encrypted_data, key, iv).decode('utf-8')
+            print(f"Decrypted message: '{decrypted_data}'")
+        except Exception as e:
+            print(f"Error during decryption: {e}. This might happen if the key/IV are incorrect or data is tampered.")
+    else:
+        print("Skipping decryption.")
+
+# --- Main Program Loop ---
+def main():
+    print("Welcome to the Python Encryption Demos!")
+    print("Choose an encryption method to demonstrate.")
+
+    while True:
+        print("\n--- Main Menu ---")
+        print("1. XOR Cipher (Educational/Simple)")
+        print("2. Fernet Encryption (Recommended for General Use)")
+        print("3. AES Encryption (Advanced Control)")
+        print("4. Quit")
+
+        choice = input("Enter your choice (1-4): ")
+
+        if choice == '1':
+            run_xor_demo()
+        elif choice == '2':
+            run_fernet_demo()
+        elif choice == '3':
+            run_aes_demo()
+        elif choice == '4':
+            print("Exiting encryption demos. Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please enter a number between 1 and 4.")
+
+if __name__ == "__main__":
+    # Ensure 'cryptography' library is installed: pip install cryptography
+    try:
+        # Test if cryptography library is available
+        from cryptography.fernet import Fernet
+        from cryptography.hazmat.primitives.ciphers import Cipher
+    except ImportError:
+        print("Error: The 'cryptography' library is not installed.")
+        print("Please install it using: pip install cryptography")
+        exit()
+    
+    main()
