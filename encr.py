@@ -62,3 +62,52 @@ def run_xor_demo():
 # --- Fernet Encryption Demo ---
 # Fernet key management functions
 FERNET_KEY_FILE = "fernet_secret.key"
+
+def generate_fernet_key():
+    """Generates a Fernet key and saves it to a file."""
+    key = Fernet.generate_key()
+    with open(FERNET_KEY_FILE, "wb") as key_file:
+        key_file.write(key)
+    print(f"Fernet key generated and saved to '{FERNET_KEY_FILE}'")
+    return key
+
+def load_fernet_key():
+    """Loads a Fernet key from a file."""
+    if not os.path.exists(FERNET_KEY_FILE):
+        return None
+    with open(FERNET_KEY_FILE, "rb") as key_file:
+        key = key_file.read()
+    print(f"Loaded Fernet key from '{FERNET_KEY_FILE}'")
+    return key
+
+def run_fernet_demo():
+    print("\n--- Fernet Encryption Demo ---")
+    print("Fernet is a high-level symmetric encryption scheme, part of the 'cryptography' library.")
+    print("It provides authenticated encryption, ensuring both confidentiality and integrity.")
+
+    # Load or generate Fernet key
+    key = load_fernet_key()
+    if key is None:
+        key = generate_fernet_key()
+
+    f = Fernet(key)
+
+    message = input("Enter the string you wish to encrypt: ")
+    
+    # Encrypt
+    # Fernet requires bytes, so encode the string
+    encrypted_data = f.encrypt(message.encode('utf-8'))
+    print(f"\nOriginal message: '{message}'")
+    print(f"Encrypted message (base64 encoded): {encrypted_data.decode('utf-8')}")
+
+    # Decrypt
+    decrypt_choice = input("Do you want to decrypt this message now? (yes/no): ").lower()
+    if decrypt_choice == 'yes':
+        try:
+            # Decrypt returns bytes, so decode to string
+            decrypted_data = f.decrypt(encrypted_data).decode('utf-8')
+            print(f"Decrypted message: '{decrypted_data}'")
+        except Exception as e:
+            print(f"Error during decryption: {e}. This might happen if the key is incorrect or data is tampered.")
+    else:
+        print("Skipping decryption.")
